@@ -22,6 +22,10 @@ function Game() {
   });
   
   const [selectedCell, setSelectedCell] = useState(null);
+  const [hintState, setHintState] = useState({
+    step: 'none', // 'none', 'highlighted', 'filled'
+    highlightedCell: null // {row, col}
+  });
   const [gameStarted, setGameStarted] = useState(false);
   const [gameCompleted, setGameCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -140,28 +144,57 @@ function Game() {
   };
 
   const getHint = async () => {
-    if (!selectedCell || gameCompleted) return;
+    if (gameCompleted) return;
     
     try {
-      const response = await axios.post('/game/hint', {
-        game_result_id: gameState.gameResultId,
-        row: selectedCell.row,
-        col: selectedCell.col
-      });
-      
-      const { row, col, value } = response.data;
-      const newBoard = [...gameState.board];
-      newBoard[row][col] = value;
-      
-      setGameState(prev => ({
-        ...prev,
-        board: newBoard,
-        usedHints: true
-      }));
-      
-      setSelectedCell(null);
+      if (hintState.step === 'none') {
+        // Step 1: Find a solvable cell to highlight
+        const response = await axios.post('/game/hint', {
+          game_result_id: gameState.gameResultId,
+          mode: 'find_cell'
+        });
+        
+        const { row, col } = response.data;
+        setHintState({
+          step: 'highlighted',
+          highlightedCell: { row, col }
+        });
+        setError(''); // Clear any previous errors
+        
+      } else if (hintState.step === 'highlighted') {
+        // Step 2: Fill the highlighted cell with the correct value
+        const { row, col } = hintState.highlightedCell;
+        const response = await axios.post('/game/hint', {
+          game_result_id: gameState.gameResultId,
+          mode: 'fill_cell',
+          row,
+          col
+        });
+        
+        const { value } = response.data;
+        const newBoard = [...gameState.board];
+        newBoard[row][col] = value;
+        
+        setGameState(prev => ({
+          ...prev,
+          board: newBoard,
+          usedHints: true
+        }));
+        
+        // Reset hint state
+        setHintState({
+          step: 'none',
+          highlightedCell: null
+        });
+        setError(''); // Clear any previous errors
+      }
     } catch (err) {
       setError(err.response?.data || 'Failed to get hint');
+      // Reset hint state on error
+      setHintState({
+        step: 'none',
+        highlightedCell: null
+      });
     }
   };
 
@@ -221,6 +254,10 @@ function Game() {
 
   const isCellSelected = (row, col) => {
     return selectedCell && selectedCell.row === row && selectedCell.col === col;
+  };
+
+  const isCellHintHighlighted = (row, col) => {
+    return hintState.step === 'highlighted' && hintState.highlightedCell && hintState.highlightedCell.row === row && hintState.highlightedCell.col === col;
   };
 
   if (!user) {
@@ -301,7 +338,9 @@ function Game() {
                 type="text"
                 className={`sudoku-cell ${
                   isCellInitial(rowIndex, colIndex) ? 'initial' : ''
-                } ${isCellSelected(rowIndex, colIndex) ? 'selected' : ''}`}
+                } ${isCellSelected(rowIndex, colIndex) ? 'selected' : ''} ${
+                  isCellHintHighlighted(rowIndex, colIndex) ? 'hint-highlighted' : ''
+                }`}
                 value={cell === 0 ? '' : cell}
                 readOnly={isCellInitial(rowIndex, colIndex)}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
@@ -335,7 +374,7 @@ function Game() {
           {gameState.mode === 'learn' && (
             <>
               <button className="btn btn-secondary" onClick={getHint}>
-                💡 Hint
+                {hintState.step === 'none' ? '💡 Hint' : '💡 Fill Hint'}
               </button>
               <button className="btn btn-secondary" onClick={solvePuzzle}>
                 🔧 Auto-Solve
@@ -379,4 +418,4 @@ function Game() {
   );
 }
 
-export default Game; 
+export default Game;

@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 
 	"sudoku/internal/models"
+	"sudoku/internal/sudoku"
 )
 
 func main() {
@@ -32,46 +33,29 @@ func main() {
 		log.Fatal("Failed to migrate database:", err)
 	}
 
-	// Sample puzzles
-	puzzles := []models.Puzzle{
-		{
-			Difficulty:   models.Easy,
-			StartingGrid: "530070000600195000098000060800060003400803001700020006060000280000419005000080079",
-			Solution:     "534678912672195348198342567859761423426853791713924856961537284287419635345286179",
-		},
-		{
-			Difficulty:   models.Easy,
-			StartingGrid: "009000000000000000000000000000000000000000000000000000000000000000000000000000000",
-			Solution:     "123456789456789123789123456234567891567891234891234567345678912678912345912345678",
-		},
-		{
-			Difficulty:   models.Medium,
-			StartingGrid: "800000000003600000070090200050007000000045700000100030001000068008500010090000400",
-			Solution:     "812753649943682175675491283154237896369845721287169534521974368438526917796318452",
-		},
-		{
-			Difficulty:   models.Medium,
-			StartingGrid: "000000000000003085001020000000507000004000100090000000500000073002010000000040009",
-			Solution:     "987654321246173985351928746128537694634892157795461832519286473472319568863745219",
-		},
-		{
-			Difficulty:   models.Hard,
-			StartingGrid: "000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-			Solution:     "123456789456789123789123456234567891567891234891234567345678912678912345912345678",
-		},
-		{
-			Difficulty:   models.Hard,
-			StartingGrid: "000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-			Solution:     "123456789456789123789123456234567891567891234891234567345678912678912345912345678",
-		},
-	}
+	sudokuService := sudoku.NewService(db)
 
-	// Insert puzzles
-	for _, puzzle := range puzzles {
-		if err := db.Create(&puzzle).Error; err != nil {
-			log.Printf("Failed to create puzzle: %v", err)
-		} else {
-			log.Printf("Created puzzle with ID: %d, Difficulty: %s", puzzle.ID, puzzle.Difficulty)
+	// Generate and insert puzzles
+	difficulties := []models.Difficulty{models.Easy, models.Medium, models.Hard}
+	for _, difficulty := range difficulties {
+		for i := 0; i < 5; i++ { // Generate 5 puzzles per difficulty
+			puzzle, solution, err := sudokuService.GeneratePuzzle(difficulty)
+			if err != nil {
+				log.Printf("Failed to generate puzzle: %v", err)
+				continue
+			}
+
+			newPuzzle := models.Puzzle{
+				Difficulty:   difficulty,
+				StartingGrid: sudoku.BoardToString(puzzle),
+				Solution:     sudoku.BoardToString(solution),
+			}
+
+			if err := db.Create(&newPuzzle).Error; err != nil {
+				log.Printf("Failed to save puzzle: %v", err)
+			} else {
+				log.Printf("Generated puzzle with ID: %d, Difficulty: %s", newPuzzle.ID, difficulty)
+			}
 		}
 	}
 

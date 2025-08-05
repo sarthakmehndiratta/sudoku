@@ -146,6 +146,58 @@ func (s *Service) GetHint(board Board, row, col int) (*Move, error) {
 	}, nil
 }
 
+// Find a solvable cell for hint highlighting
+func (s *Service) FindSolvableCell(board Board) (*Move, error) {
+	// First, try to find naked singles (cells with only one candidate)
+	nakedSingles := s.FindNakedSingles(board)
+	if len(nakedSingles) > 0 {
+		rand.Seed(time.Now().UnixNano())
+		randomIndex := rand.Intn(len(nakedSingles))
+		return &nakedSingles[randomIndex], nil
+	}
+
+	// If no naked singles, find cells with fewest candidates (2-3 options)
+	type cellCandidate struct {
+		row        int
+		col        int
+		candidates []int
+	}
+
+	var bestCells []cellCandidate
+	minCandidates := 10 // Start with a high number
+
+	for i := 0; i < 9; i++ {
+		for j := 0; j < 9; j++ {
+			if board[i][j] == 0 {
+				candidates := s.GetCandidates(board, i, j)
+				if len(candidates) > 0 && len(candidates) < minCandidates {
+					minCandidates = len(candidates)
+					bestCells = []cellCandidate{{i, j, candidates}}
+				} else if len(candidates) == minCandidates {
+					bestCells = append(bestCells, cellCandidate{i, j, candidates})
+				}
+			}
+		}
+	}
+
+	if len(bestCells) == 0 {
+		return nil, errors.New("no solvable cells found")
+	}
+
+	// Pick a random cell from the best candidates
+	rand.Seed(time.Now().UnixNano())
+	selectedCell := bestCells[rand.Intn(len(bestCells))]
+	
+	// For cells with multiple candidates, pick the first valid one
+	// (in a real hint system, we might use more sophisticated logic)
+	return &Move{
+		Row:    selectedCell.row,
+		Col:    selectedCell.col,
+		Value:  selectedCell.candidates[0],
+		Reason: "Solvable Cell",
+	}, nil
+}
+
 // Solve puzzle using backtracking
 func (s *Service) SolvePuzzle(board Board) (Board, bool) {
 	var solved Board
@@ -252,4 +304,115 @@ func (s *Service) GetRandomPuzzle(difficulty models.Difficulty) (*models.Puzzle,
 		return nil, err
 	}
 	return &puzzle, nil
+}
+
+// Randomize a solved board by shuffling rows, columns, and boxes
+func (s *Service) RandomizeBoard(board *Board) {
+	rand.Seed(time.Now().UnixNano())
+
+	// Shuffle rows within each 3x3 box
+	for box := 0; box < 3; box++ {
+		start := box * 3
+		rows := rand.Perm(3)
+		for i := 0; i < 3; i++ {
+			board[start+i], board[start+rows[i]] = board[start+rows[i]], board[start+i]
+		}
+	}
+
+	// Shuffle columns within each 3x3 box
+	for box := 0; box < 3; box++ {
+		start := box * 3
+		cols := rand.Perm(3)
+		for i := 0; i < 3; i++ {
+			for row := 0; row < 9; row++ {
+				board[row][start+i], board[row][start+cols[i]] = board[row][start+cols[i]], board[row][start+i]
+			}
+		}
+	}
+
+	// Shuffle entire 3x3 row boxes
+	rowBoxes := rand.Perm(3)
+	for i := 0; i < 3; i++ {
+		for j := 0; j < 3; j++ {
+			board[i*3+j], board[rowBoxes[i]*3+j] = board[rowBoxes[i]*3+j], board[i*3+j]
+		}
+	}
+
+	// Shuffle entire 3x3 column boxes
+	colBoxes := rand.Perm(3)
+	for i := 0; i < 3; i++ {
+		for row := 0; row < 9; row++ {
+			for j := 0; j < 3; j++ {
+				board[row][i*3+j], board[row][colBoxes[i]*3+j] = board[row][colBoxes[i]*3+j], board[row][i*3+j]
+			}
+		}
+	}
+}
+
+func (s *Service) GeneratePuzzle(difficulty models.Difficulty) (Board, Board, error) {
+	var vacantTiles int
+	switch difficulty {
+	case models.Easy:
+		vacantTiles = 45 // Fewer vacant tiles for easy puzzles
+	case models.Medium:
+		vacantTiles = 54 // Moderate vacant tiles for medium puzzles
+	case models.Hard:
+		vacantTiles = 63 // Most vacant tiles for hard puzzles
+	default:
+		return Board{}, Board{}, errors.New("invalid difficulty")
+	}
+
+	// Generate a fully solved board
+	var solved Board
+	if !s.solve(&solved) {
+		return Board{}, Board{}, errors.New("failed to generate solved board")
+	}
+
+	// Randomize the solved board
+	s.RandomizeBoard(&solved)
+
+	// Create a puzzle by removing tiles while ensuring a single solution
+	puzzle := solved
+	positions := rand.Perm(81) // Randomize cell positions
+	for _, pos := range positions {
+		if vacantTiles <= 0 {
+			break
+		}
+		row, col := pos/9, pos%9
+		backup := puzzle[row][col]
+		puzzle[row][col] = 0
+
+		// Check if the puzzle still has a unique solution
+		temp := puzzle
+		solutionCount := 0
+		s.countSolutions(&temp, &solutionCount)
+		if solutionCount != 1 {
+			puzzle[row][col] = backup // Restore the cell if multiple solutions exist
+		} else {
+			vacantTiles--
+		}
+	}
+
+	return puzzle, solved, nil
+}
+
+func (s *Service) countSolutions(board *Board, count *int) bool {
+	for i := 0; i < 9; i++ {
+		for j := 0; j < 9; j++ {
+			if board[i][j] == 0 {
+				for value := 1; value <= 9; value++ {
+					if s.IsValidMove(*board, i, j, value) {
+						board[i][j] = value
+						if s.countSolutions(board, count) {
+							return true
+						}
+						board[i][j] = 0
+					}
+				}
+				return false
+			}
+		}
+	}
+	*count++
+	return *count > 1 // Stop if more than one solution is found
 }

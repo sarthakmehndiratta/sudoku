@@ -75,10 +75,21 @@ func (h *GameHandler) StartGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get random puzzle
-	puzzle, err := h.sudokuService.GetRandomPuzzle(difficulty)
+	// Generate a new puzzle dynamically
+	puzzleBoard, solutionBoard, err := h.sudokuService.GeneratePuzzle(difficulty)
 	if err != nil {
-		http.Error(w, "Failed to get puzzle", http.StatusInternalServerError)
+		http.Error(w, "Failed to generate puzzle", http.StatusInternalServerError)
+		return
+	}
+
+	// Save the generated puzzle to the database
+	puzzle := &models.Puzzle{
+		Difficulty:   difficulty,
+		StartingGrid: sudoku.BoardToString(puzzleBoard),
+		Solution:     sudoku.BoardToString(solutionBoard),
+	}
+	if err := h.db.Create(puzzle).Error; err != nil {
+		http.Error(w, "Failed to save generated puzzle", http.StatusInternalServerError)
 		return
 	}
 
@@ -177,9 +188,10 @@ func (h *GameHandler) SubmitGame(w http.ResponseWriter, r *http.Request) {
 
 func (h *GameHandler) GetHint(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		GameResultID uint `json:"game_result_id"`
-		Row          int  `json:"row"`
-		Col          int  `json:"col"`
+		GameResultID uint   `json:"game_result_id"`
+		Mode         string `json:"mode"` // "find_cell" or "fill_cell"
+		Row          *int   `json:"row,omitempty"`
+		Col          *int   `json:"col,omitempty"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
@@ -201,17 +213,39 @@ func (h *GameHandler) GetHint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get hint
 	board := sudoku.StringToBoard(gameResult.FinalGrid)
-	hint, err := h.sudokuService.GetHint(board, req.Row, req.Col)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	var hint *sudoku.Move
+	var err error
+
+	if req.Mode == "find_cell" {
+		// Find a solvable cell to highlight
+		hint, err = h.sudokuService.FindSolvableCell(board)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	} else if req.Mode == "fill_cell" {
+		// Fill the specified cell with the correct value
+		if req.Row == nil || req.Col == nil {
+			http.Error(w, "Row and Col are required for fill_cell mode", http.StatusBadRequest)
+			return
+		}
+		
+		hint, err = h.sudokuService.GetHint(board, *req.Row, *req.Col)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Mark that hints were used and update the board state
+		board[*req.Row][*req.Col] = hint.Value
+		gameResult.FinalGrid = sudoku.BoardToString(board)
+		gameResult.UsedHints = true
+		h.db.Save(&gameResult)
+	} else {
+		http.Error(w, "Invalid mode. Use 'find_cell' or 'fill_cell'", http.StatusBadRequest)
 		return
 	}
-
-	// Mark that hints were used
-	gameResult.UsedHints = true
-	h.db.Save(&gameResult)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(hint)
