@@ -78,6 +78,7 @@ func main() {
 
 		r.Post("/game/hint", gameHandler.GetHint)
 		r.Post("/game/solve", gameHandler.SolvePuzzle)
+		r.Post("/game/solve-step", gameHandler.SolveStep)
 	})
 
 	// Start server

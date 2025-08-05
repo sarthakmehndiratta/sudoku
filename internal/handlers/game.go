@@ -251,6 +251,47 @@ func (h *GameHandler) GetHint(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(hint)
 }
 
+func (h *GameHandler) SolveStep(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		GameResultID uint `json:"game_result_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	userID := r.Context().Value(auth.UserIDKey).(uint)
+
+	// Get game result
+	var gameResult models.GameResult
+	if err := h.db.Preload("Puzzle").First(&gameResult, req.GameResultID).Error; err != nil {
+		http.Error(w, "Game not found", http.StatusNotFound)
+		return
+	}
+
+	// Verify ownership
+	if gameResult.UserID != userID {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Get next step
+	board := sudoku.StringToBoard(gameResult.FinalGrid)
+	move, err := h.sudokuService.SolveStep(board)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Update board and save to DB
+	board[move.Row][move.Col] = move.Value
+	gameResult.FinalGrid = sudoku.BoardToString(board)
+	h.db.Save(&gameResult)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(move)
+}
+
 func (h *GameHandler) SolvePuzzle(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		GameResultID uint `json:"game_result_id"`

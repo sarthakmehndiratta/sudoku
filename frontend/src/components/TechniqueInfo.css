@@ -1,0 +1,26 @@
+.technique-info-sidebar {
+  position: fixed;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  width: 300px;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 2rem;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  z-index: 1000;
+}
+
+.technique-info-sidebar h2 {
+  margin-top: 0;
+  font-size: 1.8rem;
+  color: #fff;
+}
+
+.technique-info-sidebar p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}

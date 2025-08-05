@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import TechniqueInfo from './TechniqueInfo';
 import './Game.css';
 
 function Game() {
@@ -30,6 +31,8 @@ function Game() {
   const [gameCompleted, setGameCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showTechnique, setShowTechnique] = useState(null);
+  const [lastSolvedCell, setLastSolvedCell] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -198,6 +201,30 @@ function Game() {
     }
   };
 
+  const solveStep = async () => {
+    try {
+      const response = await axios.post('/game/solve-step', {
+        game_result_id: gameState.gameResultId
+      });
+      
+      const { row, col, value, reason } = response.data;
+      const newBoard = [...gameState.board];
+      newBoard[row][col] = value;
+      
+      setGameState(prev => ({
+        ...prev,
+        board: newBoard,
+        usedAutoSolve: true // Using solve step counts as auto-solve
+      }));
+      
+      setLastSolvedCell({ row, col });
+      setShowTechnique(reason);
+      
+    } catch (err) {
+      setError(err.response?.data || 'Failed to get next step');
+    }
+  };
+
   const solvePuzzle = async () => {
     try {
       const response = await axios.post('/game/solve', {
@@ -258,6 +285,10 @@ function Game() {
 
   const isCellHintHighlighted = (row, col) => {
     return hintState.step === 'highlighted' && hintState.highlightedCell && hintState.highlightedCell.row === row && hintState.highlightedCell.col === col;
+  };
+
+  const isCellLastSolved = (row, col) => {
+    return lastSolvedCell && lastSolvedCell.row === row && lastSolvedCell.col === col;
   };
 
   if (!user) {
@@ -340,7 +371,7 @@ function Game() {
                   isCellInitial(rowIndex, colIndex) ? 'initial' : ''
                 } ${isCellSelected(rowIndex, colIndex) ? 'selected' : ''} ${
                   isCellHintHighlighted(rowIndex, colIndex) ? 'hint-highlighted' : ''
-                }`}
+                } ${isCellLastSolved(rowIndex, colIndex) ? 'last-solved' : ''}`}
                 value={cell === 0 ? '' : cell}
                 readOnly={isCellInitial(rowIndex, colIndex)}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
@@ -376,8 +407,11 @@ function Game() {
               <button className="btn btn-secondary" onClick={getHint}>
                 {hintState.step === 'none' ? '💡 Hint' : '💡 Fill Hint'}
               </button>
+              <button className="btn btn-secondary" onClick={solveStep}>
+                🔧 Solve Step
+              </button>
               <button className="btn btn-secondary" onClick={solvePuzzle}>
-                🔧 Auto-Solve
+                🔧 Auto-Solve (All)
               </button>
             </>
           )}
@@ -414,6 +448,14 @@ function Game() {
       </div>
 
       {error && <div className="error-message">{error}</div>}
+      
+      <TechniqueInfo 
+        technique={showTechnique} 
+        onClose={() => {
+          setShowTechnique(null);
+          setLastSolvedCell(null);
+        }} 
+      />
     </div>
   );
 }

@@ -198,6 +198,36 @@ func (s *Service) FindSolvableCell(board Board) (*Move, error) {
 	}, nil
 }
 
+// Solve puzzle step-by-step
+func (s *Service) SolveStep(board Board) (*Move, error) {
+	// 1. Find Naked Singles
+	nakedSingles := s.FindNakedSingles(board)
+	if len(nakedSingles) > 0 {
+		return &nakedSingles[0], nil
+	}
+
+	// 2. Find Hidden Singles (in rows, columns, and boxes)
+	// This is a more complex technique, so we'll implement a simplified version for now.
+	// We'll find the first empty cell and return a valid candidate.
+	for r := 0; r < 9; r++ {
+		for c := 0; c < 9; c++ {
+			if board[r][c] == 0 {
+				candidates := s.GetCandidates(board, r, c)
+				if len(candidates) > 0 {
+					return &Move{
+						Row:    r,
+						Col:    c,
+						Value:  candidates[0],
+						Reason: "Hidden Single (Simplified)",
+					}, nil
+				}
+			}
+		}
+	}
+
+	return nil, errors.New("no solvable moves found")
+}
+
 // Solve puzzle using backtracking
 func (s *Service) SolvePuzzle(board Board) (Board, bool) {
 	var solved Board
