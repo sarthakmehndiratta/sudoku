@@ -1,9 +1,22 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { 
+  Container, 
+  Title, 
+  Text, 
+  Card, 
+  Button, 
+  Group, 
+  Grid, 
+  Alert,
+  Center,
+  Box,
+  Stack,
+  SimpleGrid
+} from '@mantine/core';
 import { AuthContext } from '../context/AuthContext';
 import TechniqueInfo from './TechniqueInfo';
-import './Game.css';
 
 function Game() {
   const { user } = useContext(AuthContext);
@@ -297,166 +310,289 @@ function Game() {
 
   if (!gameStarted) {
     return (
-      <div className="game-setup">
-        <h2>🎮 Start New Game</h2>
-        <div className="game-options">
-          <div className="mode-selection">
-            <h3>Select Game Mode:</h3>
-            <div className="mode-buttons">
-              <button 
-                className={`btn ${gameState.mode === 'play' ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => setGameState(prev => ({ ...prev, mode: 'play' }))}
-              >
-                🎯 Play Mode (Competitive)
-              </button>
-              <button 
-                className={`btn ${gameState.mode === 'learn' ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => setGameState(prev => ({ ...prev, mode: 'learn' }))}
-              >
-                📚 Learn Mode (Educational)
-              </button>
-            </div>
-          </div>
-          
-          <div className="difficulty-selection">
-            <h3>Select Difficulty:</h3>
-            <div className="difficulty-buttons">
-              {['easy', 'medium', 'hard'].map(diff => (
-                <button 
-                  key={diff}
-                  className={`btn ${gameState.difficulty === diff ? 'btn-primary' : 'btn-secondary'}`}
-                  onClick={() => setGameState(prev => ({ ...prev, difficulty: diff }))}
-                >
-                  {diff.charAt(0).toUpperCase() + diff.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          <button 
-            className="btn btn-success start-game-btn"
-            onClick={() => startGame(gameState.mode, gameState.difficulty)}
-            disabled={loading}
-          >
-            {loading ? 'Starting...' : 'Start Game'}
-          </button>
-        </div>
+      <Container size="lg" style={{ textAlign: 'center', color: 'white' }}>
+        <Title order={2} mb="xl">
+          🎮 Start New Game
+        </Title>
         
-        {error && <div className="error-message">{error}</div>}
-      </div>
+        <Card
+          style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            maxWidth: 600,
+            margin: '0 auto',
+          }}
+          p="xl"
+          radius="md"
+        >
+          <Stack gap="xl">
+            <div>
+              <Title order={3} mb="md" c="white">
+                Select Game Mode:
+              </Title>
+              <Group justify="center" gap="md">
+                <Button 
+                  variant={gameState.mode === 'play' ? 'filled' : 'outline'}
+                  color="blue"
+                  onClick={() => setGameState(prev => ({ ...prev, mode: 'play' }))}
+                >
+                  🎯 Play Mode (Competitive)
+                </Button>
+                <Button 
+                  variant={gameState.mode === 'learn' ? 'filled' : 'outline'}
+                  color="blue"
+                  onClick={() => setGameState(prev => ({ ...prev, mode: 'learn' }))}
+                >
+                  📚 Learn Mode (Educational)
+                </Button>
+              </Group>
+            </div>
+            
+            <div>
+              <Title order={3} mb="md" c="white">
+                Select Difficulty:
+              </Title>
+              <Group justify="center" gap="md">
+                {['easy', 'medium', 'hard'].map(diff => (
+                  <Button 
+                    key={diff}
+                    variant={gameState.difficulty === diff ? 'filled' : 'outline'}
+                    color="blue"
+                    onClick={() => setGameState(prev => ({ ...prev, difficulty: diff }))}
+                  >
+                    {diff.charAt(0).toUpperCase() + diff.slice(1)}
+                  </Button>
+                ))}
+              </Group>
+            </div>
+            
+            <Button 
+              color="green"
+              size="lg"
+              onClick={() => startGame(gameState.mode, gameState.difficulty)}
+              loading={loading}
+            >
+              {loading ? 'Starting...' : 'Start Game'}
+            </Button>
+          </Stack>
+        </Card>
+        
+        {error && (
+          <Alert color="red" mt="md" style={{ background: 'rgba(220, 53, 69, 0.2)' }}>
+            {error}
+          </Alert>
+        )}
+      </Container>
     );
   }
 
   return (
-    <div className="game-container">
-      <div className="game-header">
-        <h2>🎮 Sudoku Game</h2>
-        <div className="game-info">
-          <div className="timer">⏱️ {formatTime(gameState.timer)}</div>
-          <div className="mode-info">
-            Mode: {gameState.mode === 'play' ? '🎯 Play' : '📚 Learn'} | 
-            Difficulty: {gameState.difficulty.charAt(0).toUpperCase() + gameState.difficulty.slice(1)}
-          </div>
-        </div>
-      </div>
-
-      <div className="game-board">
-        <div className="sudoku-grid" onKeyDown={handleKeyPress} tabIndex={0}>
-          {gameState.board.map((row, rowIndex) => (
-            row.map((cell, colIndex) => (
-              <input
-                key={`${rowIndex}-${colIndex}`}
-                type="text"
-                className={`sudoku-cell ${
-                  isCellInitial(rowIndex, colIndex) ? 'initial' : ''
-                } ${isCellSelected(rowIndex, colIndex) ? 'selected' : ''} ${
-                  isCellHintHighlighted(rowIndex, colIndex) ? 'hint-highlighted' : ''
-                } ${isCellLastSolved(rowIndex, colIndex) ? 'last-solved' : ''}`}
-                value={cell === 0 ? '' : cell}
-                readOnly={isCellInitial(rowIndex, colIndex)}
-                onClick={() => handleCellClick(rowIndex, colIndex)}
-                maxLength={1}
-              />
-            ))
-          ))}
-        </div>
-      </div>
-
-      <div className="game-controls">
-        <div className="number-pad">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-            <button
-              key={num}
-              className="btn number-btn"
-              onClick={() => handleNumberInput(num)}
+    <Container size="lg" style={{ textAlign: 'center', color: 'white' }}>
+      <Stack gap="xl">
+        <div>
+          <Title order={2} mb="md">🎮 Sudoku Game</Title>
+          <Group justify="center" gap="xl" style={{ flexWrap: 'wrap' }}>
+            <Card 
+              style={{ 
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
+              p="sm" 
+              radius="md"
             >
-              {num}
-            </button>
-          ))}
-          <button
-            className="btn number-btn"
-            onClick={() => handleNumberInput(0)}
-          >
-            Clear
-          </button>
+              <Text size="lg" fw={700}>⏱️ {formatTime(gameState.timer)}</Text>
+            </Card>
+            <Card 
+              style={{ 
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
+              p="sm" 
+              radius="md"
+            >
+              <Text size="md" opacity={0.9}>
+                Mode: {gameState.mode === 'play' ? '🎯 Play' : '📚 Learn'} | 
+                Difficulty: {gameState.difficulty.charAt(0).toUpperCase() + gameState.difficulty.slice(1)}
+              </Text>
+            </Card>
+          </Group>
         </div>
 
-        <div className="game-actions">
-          {gameState.mode === 'learn' && (
-            <>
-              <button className="btn btn-secondary" onClick={getHint}>
-                {hintState.step === 'none' ? '💡 Hint' : '💡 Fill Hint'}
-              </button>
-              <button className="btn btn-secondary" onClick={solveStep}>
-                🔧 Solve Step
-              </button>
-              <button className="btn btn-secondary" onClick={solvePuzzle}>
-                🔧 Auto-Solve (All)
-              </button>
-            </>
-          )}
-          
-          <button 
-            className="btn btn-success" 
-            onClick={submitGame}
-            disabled={gameCompleted}
-          >
-            {gameCompleted ? 'Game Over' : 'Submit Game'}
-          </button>
-          
-          <button 
-            className="btn btn-danger" 
-            onClick={() => {
-              setGameStarted(false);
-              setGameState({
-                gameResultId: null,
-                puzzle: null,
-                board: Array(9).fill().map(() => Array(9).fill(0)),
-                initialBoard: Array(9).fill().map(() => Array(9).fill(0)),
-                mode: 'play',
-                difficulty: 'easy',
-                startedAt: null,
-                timer: 0,
-                usedHints: false,
-                usedAutoSolve: false
-              });
-            }}
-          >
-            New Game
-          </button>
-        </div>
-      </div>
+        <Box mb="xl">
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(9, 1fr)',
+            gap: '1px',
+            backgroundColor: '#333',
+            border: '2px solid #333',
+            maxWidth: '450px',
+            margin: '0 auto'
+          }} onKeyDown={handleKeyPress} tabIndex={0}>
+            {gameState.board.map((row, rowIndex) => (
+              row.map((cell, colIndex) => {
+                const isInitial = isCellInitial(rowIndex, colIndex);
+                const isSelected = isCellSelected(rowIndex, colIndex);
+                const isHintHighlighted = isCellHintHighlighted(rowIndex, colIndex);
+                const isLastSolved = isCellLastSolved(rowIndex, colIndex);
+                
+                return (
+                  <input
+                    key={`${rowIndex}-${colIndex}`}
+                    type="text"
+                    style={{
+                      width: '100%',
+                      height: '50px',
+                      border: 'none',
+                      textAlign: 'center',
+                      fontSize: '18px',
+                      fontWeight: 'bold',
+                      backgroundColor: isInitial ? '#f5f5f5' : 
+                                    isLastSolved ? '#d4edda' :
+                                    isHintHighlighted ? '#fff3e0' :
+                                    isSelected ? '#e3f2fd' : 'white',
+                      color: isInitial ? '#333' : 
+                             isLastSolved ? '#155724' : 
+                             '#333',
+                      cursor: isInitial ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s',
+                      borderRight: (colIndex + 1) % 3 === 0 && colIndex !== 8 ? '2px solid #333' : 'none',
+                      borderBottom: Math.floor(rowIndex / 3) === 0 && rowIndex === 2 || 
+                                   Math.floor(rowIndex / 3) === 1 && rowIndex === 5 ? '2px solid #333' : 'none',
+                      outline: isSelected ? '2px solid #007bff' : 'none',
+                      animation: isHintHighlighted ? 'hint-pulse 1.5s ease-in-out infinite' : 
+                                isLastSolved ? 'fade-in 0.5s ease-in-out' : 'none'
+                    }}
+                    value={cell === 0 ? '' : cell}
+                    readOnly={isInitial}
+                    onClick={() => handleCellClick(rowIndex, colIndex)}
+                    maxLength={1}
+                  />
+                );
+              })
+            ))}
+          </div>
+        </Box>
 
-      {error && <div className="error-message">{error}</div>}
-      
-      <TechniqueInfo 
-        technique={showTechnique} 
-        onClose={() => {
-          setShowTechnique(null);
-          setLastSolvedCell(null);
-        }} 
-      />
-    </div>
+        <Stack align="center" gap="xl">
+          <SimpleGrid cols={5} spacing="sm" style={{ maxWidth: '300px' }}>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+              <Button
+                key={num}
+                variant="light"
+                size="md"
+                style={{ 
+                  width: '50px', 
+                  height: '50px',
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  color: 'white',
+                  border: '1px solid rgba(255, 255, 255, 0.3)'
+                }}
+                onClick={() => handleNumberInput(num)}
+              >
+                {num}
+              </Button>
+            ))}
+            <Button
+              variant="light"
+              size="md"
+              style={{ 
+                width: '50px', 
+                height: '50px',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                background: 'rgba(255, 255, 255, 0.1)',
+                color: 'white',
+                border: '1px solid rgba(255, 255, 255, 0.3)'
+              }}
+              onClick={() => handleNumberInput(0)}
+            >
+              Clear
+            </Button>
+          </SimpleGrid>
+
+          <Group justify="center" gap="md" style={{ flexWrap: 'wrap' }}>
+            {gameState.mode === 'learn' && (
+              <>
+                <Button 
+                  variant="outline" 
+                  color="yellow"
+                  onClick={getHint}
+                >
+                  {hintState.step === 'none' ? '💡 Hint' : '💡 Fill Hint'}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  color="orange"
+                  onClick={solveStep}
+                >
+                  🔧 Solve Step
+                </Button>
+                <Button 
+                  variant="outline" 
+                  color="orange"
+                  onClick={solvePuzzle}
+                >
+                  🔧 Auto-Solve (All)
+                </Button>
+              </>
+            )}
+            
+            <Button 
+              variant="filled"
+              color="green"
+              onClick={submitGame}
+              disabled={gameCompleted}
+            >
+              {gameCompleted ? 'Game Over' : 'Submit Game'}
+            </Button>
+            
+            <Button 
+              variant="filled"
+              color="red"
+              onClick={() => {
+                setGameStarted(false);
+                setGameState({
+                  gameResultId: null,
+                  puzzle: null,
+                  board: Array(9).fill().map(() => Array(9).fill(0)),
+                  initialBoard: Array(9).fill().map(() => Array(9).fill(0)),
+                  mode: 'play',
+                  difficulty: 'easy',
+                  startedAt: null,
+                  timer: 0,
+                  usedHints: false,
+                  usedAutoSolve: false
+                });
+              }}
+            >
+              New Game
+            </Button>
+          </Group>
+        </Stack>
+
+        {error && (
+          <Alert color="red" style={{ 
+            background: 'rgba(220, 53, 69, 0.2)',
+            border: '1px solid rgba(220, 53, 69, 0.3)'
+          }}>
+            {error}
+          </Alert>
+        )}
+        
+        <TechniqueInfo 
+          technique={showTechnique} 
+          onClose={() => {
+            setShowTechnique(null);
+            setLastSolvedCell(null);
+          }} 
+        />
+      </Stack>
+    </Container>
   );
 }
 

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
-import './App.css';
+import { MantineProvider, createTheme } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
+import '@mantine/core/styles.css';
+import '@mantine/notifications/styles.css';
 
 // Components
 import Navbar from './components/Navbar';
@@ -17,6 +20,25 @@ import { AuthContext } from './context/AuthContext';
 
 // Configure axios
 axios.defaults.baseURL = 'http://localhost:8080';
+
+const theme = createTheme({
+  colorScheme: 'dark',
+  colors: {
+    dark: [
+      '#d5d7e0',
+      '#acaebf',
+      '#8c8fa3',
+      '#666980',
+      '#4d4f66',
+      '#34354a',
+      '#2b2c3d',
+      '#1d1e30',
+      '#0c0d21',
+      '#01010a',
+    ],
+  },
+  primaryColor: 'blue',
+});
 
 function App() {
   const [user, setUser] = useState(null);
@@ -46,27 +68,43 @@ function App() {
   };
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <MantineProvider theme={theme}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh', 
+          fontSize: '24px', 
+          color: 'white' 
+        }}>
+          Loading...
+        </div>
+      </MantineProvider>
+    );
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      <Router>
-        <div className="App">
-          <Navbar />
-          <div className="container">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-              <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
-              <Route path="/game" element={<Game />} />
-              <Route path="/leaderboard" element={<Leaderboard />} />
-              <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
-            </Routes>
+    <MantineProvider theme={theme}>
+      <Notifications position="top-right" />
+      <AuthContext.Provider value={{ user, login, logout }}>
+        <Router>
+          <div style={{ minHeight: '100vh' }}>
+            <Navbar />
+            <div style={{ maxWidth: 1200, margin: '0 auto', padding: 20 }}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+                <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
+                <Route path="/game" element={<Game />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
+                <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
+              </Routes>
+            </div>
           </div>
-        </div>
-      </Router>
-    </AuthContext.Provider>
+        </Router>
+      </AuthContext.Provider>
+    </MantineProvider>
   );
 }
 

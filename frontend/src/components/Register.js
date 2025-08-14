@@ -1,8 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Container, Card, Title, TextInput, PasswordInput, Button, Alert, Anchor, Group } from '@mantine/core';
 import { AuthContext } from '../context/AuthContext';
-import './Auth.css';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -16,13 +16,6 @@ function Register() {
   
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,74 +49,149 @@ function Register() {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h2>📝 Register</h2>
-        {error && <div className="error-message">{error}</div>}
+    <Container 
+      size="xs" 
+      style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '80vh' 
+      }}
+    >
+      <Card
+        style={{
+          background: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          width: '100%',
+        }}
+        p="xl"
+        radius="md"
+      >
+        <Title order={2} ta="center" mb="xl" c="white">
+          📝 Register
+        </Title>
+        
+        {error && (
+          <Alert color="red" mb="md" style={{ background: 'rgba(220, 53, 69, 0.2)' }}>
+            {error}
+          </Alert>
+        )}
         
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <TextInput
+            label="Username"
+            placeholder="Enter your username"
+            value={formData.username}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            required
+            mb="md"
+            styles={{
+              label: { color: 'white', fontWeight: 500 },
+              input: {
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: 'white',
+                '&::placeholder': { color: 'rgba(255, 255, 255, 0.7)' },
+                '&:focus': {
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  borderColor: '#007bff',
+                },
+              },
+            }}
+          />
           
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <TextInput
+            label="Email"
+            type="email"
+            placeholder="Enter your email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            required
+            mb="md"
+            styles={{
+              label: { color: 'white', fontWeight: 500 },
+              input: {
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: 'white',
+                '&::placeholder': { color: 'rgba(255, 255, 255, 0.7)' },
+                '&:focus': {
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  borderColor: '#007bff',
+                },
+              },
+            }}
+          />
           
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <PasswordInput
+            label="Password"
+            placeholder="Enter your password"
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            required
+            mb="md"
+            styles={{
+              label: { color: 'white', fontWeight: 500 },
+              input: {
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: 'white',
+                '&::placeholder': { color: 'rgba(255, 255, 255, 0.7)' },
+                '&:focus': {
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  borderColor: '#007bff',
+                },
+              },
+            }}
+          />
           
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <PasswordInput
+            label="Confirm Password"
+            placeholder="Confirm your password"
+            value={formData.confirmPassword}
+            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+            required
+            mb="xl"
+            styles={{
+              label: { color: 'white', fontWeight: 500 },
+              input: {
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: 'white',
+                '&::placeholder': { color: 'rgba(255, 255, 255, 0.7)' },
+                '&:focus': {
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  borderColor: '#007bff',
+                },
+              },
+            }}
+          />
           
-          <button 
+          <Button 
             type="submit" 
-            className="btn btn-primary auth-btn"
-            disabled={loading}
+            fullWidth 
+            size="lg"
+            loading={loading}
+            mb="xl"
           >
             {loading ? 'Creating account...' : 'Register'}
-          </button>
+          </Button>
         </form>
         
-        <div className="auth-footer">
-          <p>Already have an account? <Link to="/login">Login here</Link></p>
-        </div>
-      </div>
-    </div>
+        <Group 
+          justify="center" 
+          pt="md" 
+          style={{ 
+            borderTop: '1px solid rgba(255, 255, 255, 0.2)' 
+          }}
+        >
+          <Anchor component={Link} to="/login" c="blue">
+            Already have an account? Login here
+          </Anchor>
+        </Group>
+      </Card>
+    </Container>
   );
 }
 

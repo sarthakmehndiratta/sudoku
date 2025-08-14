@@ -63,6 +63,8 @@ func main() {
 		r.Post("/auth/login", authHandler.Login)
 		r.Get("/puzzles", puzzleHandler.GetPuzzles)
 		r.Get("/leaderboard", gameHandler.GetLeaderboard)
+		r.Get("/debug/games", gameHandler.GetAllCompletedGames) // Debug endpoint
+		r.Post("/debug/create-dummy-data", gameHandler.CreateDummyLeaderboardData) // Create dummy data
 	})
 
 	// Protected routes

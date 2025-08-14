@@ -1,5 +1,5 @@
 import React from 'react';
-import './TechniqueInfo.css';
+import { Modal, Title, Text, Button } from '@mantine/core';
 
 const definitions = {
   "Naked Single": "A Naked Single is a cell that has only one possible candidate. This is the easiest and most common Sudoku technique.",
@@ -8,16 +8,38 @@ const definitions = {
 };
 
 function TechniqueInfo({ technique, onClose }) {
-  if (!technique) return null;
-
   return (
-    <div className="technique-modal-overlay" onClick={onClose}>
-      <div className="technique-modal-content" onClick={(e) => e.stopPropagation()}>
-        <h2>{technique}</h2>
-        <p>{definitions[technique] || "No definition available."}</p>
-        <button className="btn btn-primary" onClick={onClose}>Close</button>
-      </div>
-    </div>
+    <Modal
+      opened={!!technique}
+      onClose={onClose}
+      title={
+        <Title order={2} c="white">
+          {technique}
+        </Title>
+      }
+      centered
+      styles={{
+        content: {
+          background: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+        },
+        header: {
+          background: 'transparent',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+        },
+        close: {
+          color: 'white',
+        }
+      }}
+    >
+      <Text size="lg" style={{ lineHeight: 1.6, marginBottom: '2rem' }} c="white">
+        {definitions[technique] || "No definition available."}
+      </Text>
+      <Button onClick={onClose} fullWidth>
+        Close
+      </Button>
+    </Modal>
   );
 }
 

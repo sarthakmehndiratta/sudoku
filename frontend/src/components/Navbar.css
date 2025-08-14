@@ -47,7 +47,4 @@
   }
   
   .navbar-menu {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-} 
+/* All styles migrated to Mantine components. This file is now empty. */

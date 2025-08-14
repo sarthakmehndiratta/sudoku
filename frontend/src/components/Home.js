@@ -1,76 +1,158 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { Container, Title, Text, Grid, Card, Button, Group, List } from '@mantine/core';
 import { AuthContext } from '../context/AuthContext';
-import './Home.css';
 
 function Home() {
   const { user } = useContext(AuthContext);
 
   return (
-    <div className="home">
-      <div className="hero">
-        <h1>🎮 Welcome to Sudoku Game</h1>
-        <p>Challenge yourself with puzzles of varying difficulty levels</p>
-        <p>Compete with others on the leaderboard or learn at your own pace</p>
+    <Container size="lg" style={{ textAlign: 'center', color: 'white' }}>
+      <div style={{ marginBottom: '3rem' }}>
+        <Title 
+          order={1} 
+          size="3rem" 
+          mb="lg" 
+          style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}
+        >
+          🎮 Welcome to Sudoku Game
+        </Title>
+        <Text size="xl" mb="xs" style={{ opacity: 0.9 }}>
+          Challenge yourself with puzzles of varying difficulty levels
+        </Text>
+        <Text size="xl" style={{ opacity: 0.9 }}>
+          Compete with others on the leaderboard or learn at your own pace
+        </Text>
       </div>
 
-      <div className="features">
-        <div className="feature-card">
-          <h3>🎯 Play Mode</h3>
-          <p>Competitive gameplay with scoring and leaderboards</p>
-          <ul>
-            <li>Timer runs from start to finish</li>
-            <li>No hints allowed</li>
-            <li>Auto-solve disqualifies from scoring</li>
-            <li>+10 points per correct number</li>
-          </ul>
-          {user ? (
-            <Link to="/game" className="btn btn-primary">Start Playing</Link>
-          ) : (
-            <Link to="/login" className="btn btn-primary">Login to Play</Link>
-          )}
-        </div>
+      <Grid gutter="xl" mb="3rem">
+        <Grid.Col span={{ base: 12, md: 4 }}>
+          <Card
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              height: '100%',
+            }}
+            p="xl"
+            radius="md"
+          >
+            <Title order={3} size="1.5rem" mb="md" c="white">
+              🎯 Play Mode
+            </Title>
+            <Text mb="md" style={{ opacity: 0.9 }}>
+              Competitive gameplay with scoring and leaderboards
+            </Text>
+            <List style={{ textAlign: 'left', marginBottom: '1.5rem' }}>
+              <List.Item style={{ opacity: 0.8 }}>Timer runs from start to finish</List.Item>
+              <List.Item style={{ opacity: 0.8 }}>No hints allowed</List.Item>
+              <List.Item style={{ opacity: 0.8 }}>Auto-solve disqualifies from scoring</List.Item>
+              <List.Item style={{ opacity: 0.8 }}>+10 points per correct number</List.Item>
+            </List>
+            {user ? (
+              <Button component={Link} to="/game" variant="filled" color="blue">
+                Start Playing
+              </Button>
+            ) : (
+              <Button component={Link} to="/login" variant="filled" color="blue">
+                Login to Play
+              </Button>
+            )}
+          </Card>
+        </Grid.Col>
 
-        <div className="feature-card">
-          <h3>📚 Learn Mode</h3>
-          <p>Educational mode for learning Sudoku techniques</p>
-          <ul>
-            <li>Use hints and auto-solver</li>
-            <li>Step through solutions</li>
-            <li>See human-style reasoning</li>
-            <li>No timer pressure</li>
-          </ul>
-          {user ? (
-            <Link to="/game" className="btn btn-secondary">Start Learning</Link>
-          ) : (
-            <Link to="/register" className="btn btn-secondary">Register to Learn</Link>
-          )}
-        </div>
+        <Grid.Col span={{ base: 12, md: 4 }}>
+          <Card
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              height: '100%',
+            }}
+            p="xl"
+            radius="md"
+          >
+            <Title order={3} size="1.5rem" mb="md" c="white">
+              📚 Learn Mode
+            </Title>
+            <Text mb="md" style={{ opacity: 0.9 }}>
+              Educational mode for learning Sudoku techniques
+            </Text>
+            <List style={{ textAlign: 'left', marginBottom: '1.5rem' }}>
+              <List.Item style={{ opacity: 0.8 }}>Use hints and auto-solver</List.Item>
+              <List.Item style={{ opacity: 0.8 }}>Step through solutions</List.Item>
+              <List.Item style={{ opacity: 0.8 }}>See human-style reasoning</List.Item>
+              <List.Item style={{ opacity: 0.8 }}>No timer pressure</List.Item>
+            </List>
+            {user ? (
+              <Button component={Link} to="/game" variant="filled" color="gray">
+                Start Learning
+              </Button>
+            ) : (
+              <Button component={Link} to="/register" variant="filled" color="gray">
+                Register to Learn
+              </Button>
+            )}
+          </Card>
+        </Grid.Col>
 
-        <div className="feature-card">
-          <h3>🏆 Leaderboards</h3>
-          <p>Compete with players worldwide</p>
-          <ul>
-            <li>Fastest time rankings</li>
-            <li>Highest score rankings</li>
-            <li>Filter by difficulty</li>
-            <li>Real-time updates</li>
-          </ul>
-          <Link to="/leaderboard" className="btn btn-success">View Leaderboard</Link>
-        </div>
-      </div>
+        <Grid.Col span={{ base: 12, md: 4 }}>
+          <Card
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              height: '100%',
+            }}
+            p="xl"
+            radius="md"
+          >
+            <Title order={3} size="1.5rem" mb="md" c="white">
+              🏆 Leaderboards
+            </Title>
+            <Text mb="md" style={{ opacity: 0.9 }}>
+              Compete with players worldwide
+            </Text>
+            <List style={{ textAlign: 'left', marginBottom: '1.5rem' }}>
+              <List.Item style={{ opacity: 0.8 }}>Fastest time rankings</List.Item>
+              <List.Item style={{ opacity: 0.8 }}>Highest score rankings</List.Item>
+              <List.Item style={{ opacity: 0.8 }}>Filter by difficulty</List.Item>
+              <List.Item style={{ opacity: 0.8 }}>Real-time updates</List.Item>
+            </List>
+            <Button component={Link} to="/leaderboard" variant="filled" color="green">
+              View Leaderboard
+            </Button>
+          </Card>
+        </Grid.Col>
+      </Grid>
 
       {!user && (
-        <div className="cta">
-          <h2>Ready to start?</h2>
-          <p>Join thousands of players and improve your Sudoku skills</p>
-          <div className="cta-buttons">
-            <Link to="/register" className="btn btn-primary">Create Account</Link>
-            <Link to="/login" className="btn btn-secondary">Sign In</Link>
-          </div>
-        </div>
+        <Card
+          style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+          }}
+          p="xl"
+          radius="md"
+        >
+          <Title order={2} size="2rem" mb="md">
+            Ready to start?
+          </Title>
+          <Text size="lg" mb="xl" style={{ opacity: 0.9 }}>
+            Join thousands of players and improve your Sudoku skills
+          </Text>
+          <Group justify="center" gap="md">
+            <Button component={Link} to="/register" variant="filled" color="blue" size="lg">
+              Create Account
+            </Button>
+            <Button component={Link} to="/login" variant="filled" color="gray" size="lg">
+              Sign In
+            </Button>
+          </Group>
+        </Card>
       )}
-    </div>
+    </Container>
   );
 }
 

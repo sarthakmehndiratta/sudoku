@@ -18,6 +18,25 @@ code {
   box-sizing: border-box;
 }
 
+/* Animation keyframes for game */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes hint-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(255, 152, 0, 0.8);
+  }
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
