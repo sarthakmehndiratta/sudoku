@@ -79,91 +79,127 @@ function Profile() {
 
   return (
     <Container size="lg" style={{ color: 'white', textAlign: 'center' }}>
-      <Stack gap="xl">
-        <Title order={2} size="2.5rem" mb="xl">
-          👤 User Profile
-        </Title>
-        
-        {error && (
-          <Alert color="red" style={{ 
-            background: 'rgba(220, 53, 69, 0.2)',
-            border: '1px solid rgba(220, 53, 69, 0.3)'
-          }}>
-            {error}
-          </Alert>
-        )}
+    <Stack gap="xl">
+  {/* Profile heading + Username */}
+  {profile && (
+    <div>
+      <Title
+        order={2}
+        size="2.5rem"
+        mb="xs"
+        style={{ textAlign: 'left' }}
+      >
+       Profile
+      </Title>
+      <Text
+        size="1.75rem"
+        fw={700}
+        c="black"
+        style={{
+          textAlign: 'left',
+          letterSpacing: '0.5px',
+          textShadow: '0 1px 2px rgba(0,0,0,0.4)',
+        }}
+        mb="xl"
+      >
+        {profile.username}
+      </Text>
+    </div>
+  )}
 
-        {profile && (
-          <SimpleGrid cols={{ base: 2, md: 4 }} spacing="xl" mb="3rem">
-            <Card
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-              }}
-              p="xl"
-              radius="md"
-            >
-              <Text size="2.5rem" fw={700} c="blue" mb="xs">
-                {profile.total_points}
-              </Text>
-              <Text size="lg" style={{ opacity: 0.9, textTransform: 'uppercase', letterSpacing: '1px' }} c="white">
-                Total Points
-              </Text>
-            </Card>
-            
-            <Card
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-              }}
-              p="xl"
-              radius="md"
-            >
-              <Text size="2.5rem" fw={700} c="blue" mb="xs">
-                {profile.games_played}
-              </Text>
-              <Text size="lg" style={{ opacity: 0.9, textTransform: 'uppercase', letterSpacing: '1px' }} c="white">
-                Games Played
-              </Text>
-            </Card>
-            
-            <Card
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-              }}
-              p="xl"
-              radius="md"
-            >
-              <Text size="2.5rem" fw={700} c="blue" mb="xs">
-                {profile.games_played > 0 ? Math.round(profile.total_points / profile.games_played) : 0}
-              </Text>
-              <Text size="lg" style={{ opacity: 0.9, textTransform: 'uppercase', letterSpacing: '1px' }} c="white">
-                Average Score
-              </Text>
-            </Card>
-            
-            <Card
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-              }}
-              p="xl"
-              radius="md"
-            >
-              <Text size="2.5rem" fw={700} c="blue" mb="xs">
-                {profile.username}
-              </Text>
-              <Text size="lg" style={{ opacity: 0.9, textTransform: 'uppercase', letterSpacing: '1px' }} c="white">
-                Username
-              </Text>
-            </Card>
-          </SimpleGrid>
-        )}
+  {error && (
+    <Alert
+      color="red"
+      style={{
+        background: 'rgba(220, 53, 69, 0.2)',
+        border: '1px solid rgba(220, 53, 69, 0.3)',
+      }}
+    >
+      {error}
+    </Alert>
+  )}
+
+  {profile && (
+    <SimpleGrid cols={{ base: 2, md: 3 }} spacing="xl" mb="3rem">
+      <Card
+        p="xl"
+        radius="md"
+        style={{
+          background: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+        }}
+      >
+        <Text size="2.5rem" fw={700} c="black" mb="xs">
+          {profile.total_points}
+        </Text>
+        <Text
+          size="lg"
+          style={{
+            opacity: 0.9,
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+          }}
+          c="white"
+        >
+          Total Points
+        </Text>
+      </Card>
+
+      <Card
+        p="xl"
+        radius="md"
+        style={{
+          background: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+        }}
+      >
+        <Text size="2.5rem" fw={700} c="black" mb="xs">
+          {profile.games_played}
+        </Text>
+        <Text
+          size="lg"
+          style={{
+            opacity: 0.9,
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+          }}
+          c="white"
+        >
+          Games Played
+        </Text>
+      </Card>
+
+      <Card
+        p="xl"
+        radius="md"
+        style={{
+          background: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+        }}
+      >
+        <Text size="2.5rem" fw={700} c="black" mb="xs">
+          {profile.games_played > 0
+            ? Math.round(profile.total_points / profile.games_played)
+            : 0}
+        </Text>
+        <Text
+          size="lg"
+          style={{
+            opacity: 0.9,
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+          }}
+          c="white"
+        >
+          Average Score
+        </Text>
+      </Card>
+    </SimpleGrid>
+  )}
+
 
         <Card
           style={{

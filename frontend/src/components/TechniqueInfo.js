@@ -11,31 +11,15 @@ function TechniqueInfo({ technique, onClose }) {
   if (!technique) return null;
 
   return (
-    <Card
-      style={{
-        background: 'rgba(255, 255, 255, 0.1)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
-        color: 'white',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column'
-      }}
-      p="xl"
-      radius="md"
-    >
-      <Stack justify="space-between" style={{ flex: 1 }}>
-        <div>
-          <Title order={3} mb="md">{technique}</Title>
-          <Text size="md" style={{ lineHeight: 1.6 }}>
-            {definitions[technique] || "No definition available."}
-          </Text>
-        </div>
-        <Button onClick={onClose} variant="outline" color="gray" mt="md">
-          Close
-        </Button>
-      </Stack>
-    </Card>
+    <Stack gap="sm">
+      <Title order={5} c="white" ta="center">{technique}</Title>
+      <Text size="sm" c="white" style={{ lineHeight: 1.4 }}>
+        {definitions[technique] || "No definition available."}
+      </Text>
+      <Button onClick={onClose} variant="outline" color="black" size="xs" fullWidth>
+        Close
+      </Button>
+    </Stack>
   );
 }
 

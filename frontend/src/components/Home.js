@@ -15,7 +15,7 @@ function Home() {
           mb="lg" 
           style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}
         >
-          🎮 Welcome to Sudoku Game
+          🎮 Welcome to SudokuPro
         </Title>
         <Text size="xl" mb="xs" style={{ opacity: 0.9 }}>
           Challenge yourself with puzzles of varying difficulty levels
@@ -119,7 +119,7 @@ function Home() {
               <List.Item style={{ opacity: 0.8 }}>Filter by difficulty</List.Item>
               <List.Item style={{ opacity: 0.8 }}>Real-time updates</List.Item>
             </List>
-            <Button component={Link} to="/leaderboard" variant="filled" color="green">
+            <Button component={Link} to="/leaderboard" variant="filled" color="green" style={{ marginTop: '1.6rem' }}>
               View Leaderboard
             </Button>
           </Card>

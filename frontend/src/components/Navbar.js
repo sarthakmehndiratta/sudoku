@@ -30,7 +30,7 @@ function Navbar() {
           fz="xl" 
           style={{ textDecoration: 'none' }}
         >
-          🎮 Sudoku Game
+          🎮 SudokuPro
         </Anchor>
         
         <Group gap="md">
