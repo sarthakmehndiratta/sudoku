@@ -121,100 +121,35 @@ func (s *Service) GetHint(board Board, row, col int) (*Move, error) {
 		return nil, errors.New("cell is already filled")
 	}
 
-	// Try to find a naked single
-	nakedSingles := s.FindNakedSingles(board)
-	for _, move := range nakedSingles {
-		if move.Row == row && move.Col == col {
-			return &move, nil
-		}
+	// Use the solver to find the correct value for the cell, ensuring the hint is always correct.
+	solvedBoard, success := s.SolvePuzzle(board)
+	if !success {
+		return nil, errors.New("puzzle cannot be solved from current state")
 	}
 
-	// If no naked single, return a random valid candidate
-	candidates := s.GetCandidates(board, row, col)
-	if len(candidates) == 0 {
-		return nil, errors.New("no valid candidates for this cell")
+	correctValue := solvedBoard[row][col]
+
+	// We can try to find a reason for the move.
+	// This is not essential for correctness but provides better user feedback.
+	step, err := s.SolveStep(board)
+	if err == nil && step.Row == row && step.Col == col {
+		// If SolveStep identifies the same cell, we can use its reason.
+		return step, nil
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	randomIndex := rand.Intn(len(candidates))
-
+	// Otherwise, return the value with a generic reason.
 	return &Move{
 		Row:    row,
 		Col:    col,
-		Value:  candidates[randomIndex],
+		Value:  correctValue,
 		Reason: "Hint",
 	}, nil
 }
 
 // Find a solvable cell for hint highlighting
 func (s *Service) FindSolvableCell(board Board) (*Move, error) {
-	// First, try to find naked singles (cells with only one candidate)
-	nakedSingles := s.FindNakedSingles(board)
-	if len(nakedSingles) > 0 {
-		rand.Seed(time.Now().UnixNano())
-		randomIndex := rand.Intn(len(nakedSingles))
-		return &nakedSingles[randomIndex], nil
-	}
-
-	// If no naked singles, find cells with fewest candidates (2-3 options)
-	type cellCandidate struct {
-		row        int
-		col        int
-		candidates []int
-	}
-
-	var bestCells []cellCandidate
-	minCandidates := 10 // Start with a high number
-
-	for i := 0; i < 9; i++ {
-		for j := 0; j < 9; j++ {
-			if board[i][j] == 0 {
-				candidates := s.GetCandidates(board, i, j)
-				if len(candidates) > 0 && len(candidates) < minCandidates {
-					minCandidates = len(candidates)
-					bestCells = []cellCandidate{{i, j, candidates}}
-				} else if len(candidates) == minCandidates {
-					bestCells = append(bestCells, cellCandidate{i, j, candidates})
-				}
-			}
-		}
-	}
-
-	if len(bestCells) == 0 {
-		// If no simple moves, use backtracking to find the next logical step
-		solvedBoard, success := s.SolvePuzzle(board)
-		if !success {
-			return nil, errors.New("puzzle cannot be solved")
-		}
-
-		// Find the first empty cell and return the solved value
-		for r := 0; r < 9; r++ {
-			for c := 0; c < 9; c++ {
-				if board[r][c] == 0 {
-					return &Move{
-						Row:    r,
-						Col:    c,
-						Value:  solvedBoard[r][c],
-						Reason: "Advanced Step",
-					}, nil
-				}
-			}
-		}
-		return nil, errors.New("no solvable cells found")
-	}
-
-	// Pick a random cell from the best candidates
-	rand.Seed(time.Now().UnixNano())
-	selectedCell := bestCells[rand.Intn(len(bestCells))]
-
-	// For cells with multiple candidates, pick the first valid one
-	// (in a real hint system, we might use more sophisticated logic)
-	return &Move{
-		Row:    selectedCell.row,
-		Col:    selectedCell.col,
-		Value:  selectedCell.candidates[0],
-		Reason: "Solvable Cell",
-	}, nil
+	// Use the same logic as SolveStep to ensure the hint is always a correct and logical next move.
+	return s.SolveStep(board)
 }
 
 // Find hidden singles (cells where a candidate is unique in a row, column, or box)

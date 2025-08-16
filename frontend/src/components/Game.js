@@ -301,7 +301,8 @@ function Game() {
     
     try {
       const response = await axios.post('/game/solve-step', {
-        game_result_id: gameState.gameResultId
+        game_result_id: gameState.gameResultId,
+        current_grid: gridToString(gameState.board)
       });
       
       const { row, col, value, reason } = response.data;
@@ -325,7 +326,8 @@ function Game() {
   const solvePuzzle = async () => {
     try {
       const response = await axios.post('/game/solve', {
-        game_result_id: gameState.gameResultId
+        game_result_id: gameState.gameResultId,
+        current_grid: gridToString(gameState.board)
       });
       
       const solvedBoard = parseGrid(response.data.solved_grid);

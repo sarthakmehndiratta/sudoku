@@ -256,7 +256,8 @@ func (h *GameHandler) GetHint(w http.ResponseWriter, r *http.Request) {
 
 func (h *GameHandler) SolveStep(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		GameResultID uint `json:"game_result_id"`
+		GameResultID uint   `json:"game_result_id"`
+		CurrentGrid  string `json:"current_grid"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
@@ -279,7 +280,7 @@ func (h *GameHandler) SolveStep(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get next step
-	board := sudoku.StringToBoard(gameResult.FinalGrid)
+	board := sudoku.StringToBoard(req.CurrentGrid)
 	move, err := h.sudokuService.SolveStep(board)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -297,7 +298,8 @@ func (h *GameHandler) SolveStep(w http.ResponseWriter, r *http.Request) {
 
 func (h *GameHandler) SolvePuzzle(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		GameResultID uint `json:"game_result_id"`
+		GameResultID uint   `json:"game_result_id"`
+		CurrentGrid  string `json:"current_grid"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
@@ -320,7 +322,7 @@ func (h *GameHandler) SolvePuzzle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Solve puzzle
-	board := sudoku.StringToBoard(gameResult.FinalGrid)
+	board := sudoku.StringToBoard(req.CurrentGrid)
 	solvedBoard, success := h.sudokuService.SolvePuzzle(board)
 
 	if !success {
